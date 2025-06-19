@@ -133,6 +133,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        @if ($a->image)
+                            <img src="{{ asset('storage/' . $a->image) }}" alt="Announcement Image" class="img-fluid mb-3" style="max-width: 100%; border-radius: 8px;">
+                        @endif
+                        
                         <p><strong>Status:</strong> {{ ucfirst($a->status) }}</p>
                         <hr>
                         <p>{{ $a->content }}</p>

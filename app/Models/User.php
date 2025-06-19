@@ -46,4 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class);
+    }
+
+    public function isSuspended()
+    {
+    return $this->status === 'suspended';
+    }
 }

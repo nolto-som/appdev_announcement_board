@@ -11,7 +11,8 @@ class AnnouncementController extends Controller
 {
    public function home()
 {
-    if (auth()->user()->role === 'admin') {
+    if (auth()->check() && auth()->user()->role === 'admin')
+ {
         return redirect()->route('admin.announcements.index');
     }
 
@@ -47,23 +48,35 @@ public function recent()
     // Store a new announcement
     public function store(Request $request)
 {
+    //  dd('store method hit');
     $request->validate([
         'title' => 'required|string',
         'content' => 'required|string',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
     ]);
+
+         $imagePath = null;
+        if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('announcements', 'public');
+        }
 
     // Create the announcement
     $announcement = Announcement::create([
         'title' => $request->title,
         'content' => $request->content,
         'status' => 'approved', // Auto-approved if created by admin
+        'user_id' => auth()->id(),
+        'image' => $imagePath,
     ]);
+    
 
     // Notify all users
     $users = User::where('role', 'user')->get();
     foreach ($users as $user) {
         $user->notify(new NewAnnouncementNotification($announcement));
     }
+
+    // dd($announcement);
 
     return redirect()->route('admin.announcements.index')->with('success', 'Announcement posted.');
 }
@@ -77,28 +90,33 @@ public function recent()
     }
 
     // Update the announcement
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         $announcement = Announcement::findOrFail($id);
 
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-        ]);
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ]);
 
-        $announcement->update($request->only(['title', 'content']));
+        $data = $request->only(['title', 'content']);
 
-        return redirect()->route('admin.announcements.index')->with('success', 'Announcement updated.');
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($announcement->image && \Storage::disk('public')->exists($announcement->image)) {
+                \Storage::disk('public')->delete($announcement->image);
+        }
+
+        // Store new image
+        $data['image'] = $request->file('image')->store('announcements', 'public');
     }
 
-    // Delete an announcement
-    public function destroy($id)
-    {
-        $announcement = Announcement::findOrFail($id);
-        $announcement->delete();
+        $announcement->update($data);
 
-        return redirect()->route('admin.announcements.index')->with('success', 'Announcement deleted.');
-    }
+    return redirect()->route('admin.announcements.index')->with('success', 'Announcement updated.');
+}
+
 
     // Approve a pending announcement
     public function approve($id)
@@ -120,13 +138,25 @@ public function recent()
         return redirect()->back()->with('success', 'Announcement archived.');
     }
 
-//     public function archived()
-// {
-//     $announcements = Announcement::where('status', 'archived')
-//         ->orderBy('created_at', 'desc')
-//         ->get();
+    public function archived()
+{
+    $announcements = Announcement::where('status', 'archived')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-//     return view('admin.announcements.archived', compact('announcements'));
-// }
+    return view('admin.announcements.archived', compact('announcements'));
+}
+
+// Restore archived announcement
+public function restore($id)
+{
+    $announcement = Announcement::findOrFail($id);
+    $announcement->status = 'approved';
+    $announcement->save();
+
+    return redirect()->route('admin.announcements.archived')->with('success', 'Announcement restored.');
+}
+
+
 
 }

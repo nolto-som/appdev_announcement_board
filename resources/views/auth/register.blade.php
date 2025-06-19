@@ -27,10 +27,10 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label class="form-label" for="admin_code">Share Your Thoughts (Optional)</label>
                 <input type="text" name="admin_code" class="form-control">
-            </div>
+            </div> -->
 
             <button class="btn btn-primary w-100">Sign Up</button>
         </form>

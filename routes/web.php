@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/test-secret', function () {
     return config('app.admin_secret'); // or env('ADMIN_SECRET')
@@ -38,9 +39,19 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('home', [AnnouncementController::class, 'adminHome'])->name('admin.home');
-    Route::resource('announcements', AnnouncementController::class);
+    Route::resource('announcements', AnnouncementController::class)->except(['show']);
+    
+    //Announcement Status
     Route::post('/announcements/{id}/approve', [AnnouncementController::class, 'approve'])->name('announcements.approve');
     Route::post('/announcements/{id}/archive', [AnnouncementController::class, 'archive'])->name('announcements.archive');
+    Route::get('/announcements/archived', [AnnouncementController::class, 'archived'])->name('announcements.archived');
+    Route::post('/announcements/{id}/restore', [AnnouncementController::class, 'restore'])->name('announcements.restore');
+
+
+    //Manage Users
+    Route::resource('users', AdminUserController::class)->except(['create', 'store']);
+    Route::post('/users/{id}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggleStatus');
+
     
     });
 });

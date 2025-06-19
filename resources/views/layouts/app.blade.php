@@ -76,8 +76,8 @@
 
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        👤 Profile
-                        @if(auth()->user()->role === 'admin')
+                        👤 {{ auth()->user()->name }}
+                        @if(auth()->check() && auth()->user()->role === 'admin')
                             <span class="badge bg-danger">Admin</span>
                         @endif
                     </a>
@@ -92,8 +92,8 @@
                     </ul>
                 </div>
             @else
-                <!-- <a class="btn btn-outline-primary" href="{{ route('login') }}">Login</a>
-                <a class="btn btn-primary" href="{{ route('register') }}">Sign Up</a> -->
+                <a class="btn btn-outline-primary" href="{{ route('login') }}">Login</a>
+                <a class="btn btn-primary" href="{{ route('register') }}">Sign Up</a>
             @endauth
         </div>
     </div>
@@ -107,9 +107,17 @@
             <ul class="nav flex-column">
                 <li class="nav-item mb-2"><a class="nav-link" href="/">🏠 Home</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('announcements.recent') }}">🕒 Recent</a></li>
-                @if(auth()->user()->role === 'admin')
+                
+                @if(auth()->check() && auth()->user()->role === 'admin')
                     <!-- <li class="nav-item mb-2"><a class="nav-link" href="{{ route('admin.announcements.index') }}">🛠 Manage Announcements</a></li> -->
+                    <li class="nav-item mb-2">
+                    <a class="nav-link" href="{{ route('admin.users.index') }}">👥 User Management</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                    <a class="nav-link" href="{{ route('admin.announcements.archived') }}">🗃 Archived Announcements</a>
+                    </li>
                 @endif
+                
             </ul>
         </div>
 

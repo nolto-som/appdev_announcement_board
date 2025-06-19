@@ -97,6 +97,10 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
+                                    @if ($announcement->image)
+                                        <img src="{{ asset('storage/' . $announcement->image) }}" alt="Announcement Image" class="img-fluid mb-3" style="max-width: 100%; border-radius: 8px;">
+                                    @endif
+                                    
                                     <p>{{ $announcement->content }}</p>
                                     <hr>
                                     <p class="text-muted"><small>Posted on {{ $announcement->created_at->format('F d, Y h:i A') }}</small></p>
