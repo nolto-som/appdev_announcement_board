@@ -76,6 +76,18 @@
 
     <h1 class="announcement-title">📢 Community Announcement Board</h1>
     <p class="announcement-subtitle">Click any announcement to view more details.</p>
+    <div class="container mb-4">
+    <div class="container mb-4 d-flex justify-content-center">
+      
+    <form method="GET" action="{{ route('home') }}" class="w-100" style="max-width: 600px;">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search by title, content, or date..." value="{{ request('search') }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+</div>
 
     @isset($announcements)
         <div class="row justify-content-center px-3">

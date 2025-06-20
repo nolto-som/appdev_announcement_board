@@ -5,16 +5,28 @@
     <div class="card p-4 shadow" style="width: 100%; max-width: 500px;">
         <h2 class="text-center mb-4">Register</h2>
 
+        {{-- Show all validation errors --}}
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form method="POST" action="/register">
             @csrf
+
             <div class="mb-3">
                 <label class="form-label">Name:</label>
-                <input type="text" name="name" class="form-control" required>
+                <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Email:</label>
-                <input type="email" name="email" class="form-control" required>
+                <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
             </div>
 
             <div class="mb-3">
@@ -27,10 +39,13 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
-            <!-- <div class="mb-3">
-                <label class="form-label" for="admin_code">Share Your Thoughts (Optional)</label>
+            <!-- Optional field (still kept if needed later) -->
+            <!--
+            <div class="mb-3">
+                <label class="form-label">Admin Code (Optional):</label>
                 <input type="text" name="admin_code" class="form-control">
-            </div> -->
+            </div>
+            -->
 
             <button class="btn btn-primary w-100">Sign Up</button>
         </form>

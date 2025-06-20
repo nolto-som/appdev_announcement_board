@@ -8,63 +8,72 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3 mb-3">
-        <div class="col-md-4">
-            <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search name or email">
-        </div>
-        <div class="col-md-3">
-            <select name="status" class="form-control">
-                <option value="">All Statuses</option>
-                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspended</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <button class="btn btn-primary">Filter</button>
-        </div>
-    </form>
+    <form method="GET" action="{{ route('admin.users.index') }}" class="d-flex gap-2 mb-3">
+    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search users..." class="form-control" />
+    
+    <select name="status" class="form-select">
+        <option value="">All Statuses</option>
+        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+        <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Suspended</option>
+    </select>
 
-    <div class="row">
-        @forelse ($users as $user)
-            <div class="col-md-6 mb-3">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title mb-1">{{ $user->name }} 
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+
+    @if($users->count())
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                    <tr>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ ucfirst($user->role_id) }}</td>
+                        <td>
                             @if($user->status === 'suspended')
                                 <span class="badge bg-warning text-dark">Suspended</span>
+                            @else
+                                <span class="badge bg-success">Active</span>
                             @endif
-                        </h5>
-                        <p class="mb-1"><strong>Email:</strong> {{ $user->email }}</p>
-                        <p class="mb-2"><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-info btn-sm">Edit</a>
 
-                        <div class="d-flex gap-2 justify-content-end">
-                            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-info btn-sm">Edit</a>
+                                <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST">
+                                    @csrf
+                                    <button class="btn btn-warning btn-sm">
+                                        {{ $user->status === 'active' ? 'Suspend' : 'Reactivate' }}
+                                    </button>
+                                </form>
 
-                            <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST">
-                                @csrf
-                                <button class="btn btn-warning btn-sm">
-                                    {{ $user->status === 'active' ? 'Suspend' : 'Reactivate' }}
-                                </button>
-                            </form>
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete this user?');">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete this user?');">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="alert alert-info">No users found.</div>
-            </div>
-        @endforelse
-    </div>
-
-    <<div class="d-flex justify-content-center mt-4">
-        {{ $users->withQueryString()->links('pagination::bootstrap-5') }}
-    </div>
-
+        <div class="d-flex justify-content-center mt-4">
+            {{ $users->withQueryString()->links('pagination::bootstrap-5') }}
+        </div>
+    @else
+        <div class="alert alert-info">No users found.</div>
+    @endif
 </div>
 @endsection

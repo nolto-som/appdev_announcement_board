@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('users', function (Blueprint $table) {
-        //      $table->enum('status', ['active','reactivate', 'suspended'])->default('active');
-        // });
+        Schema::create('statuses', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); // e.g., active, suspended
+            $table->timestamps();
+        });
     }
 
     /**
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('statuses');
     }
 };

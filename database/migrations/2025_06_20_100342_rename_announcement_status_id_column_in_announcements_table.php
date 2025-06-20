@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('users', function (Blueprint $table) {
-        //      $table->enum('status', ['active','reactivate', 'suspended'])->default('active');
-        // });
+        Schema::table('announcements', function (Blueprint $table) {
+    $table->renameColumn('announcementStatus_id', 'announcement_status_id');
+});
     }
 
     /**
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('announcements', function (Blueprint $table) {
             //
         });
     }

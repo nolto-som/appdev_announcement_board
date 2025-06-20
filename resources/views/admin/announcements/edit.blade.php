@@ -4,9 +4,8 @@
 <div class="container mt-4">
     <h3>Edit Announcement</h3>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+
+
 
     <form action="{{ route('admin.announcements.update', $announcement->id) }}" method="POST" enctype="multipart/form-data">
         @csrf

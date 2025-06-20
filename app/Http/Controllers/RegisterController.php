@@ -23,22 +23,20 @@ class RegisterController extends Controller
 
     $adminSecret = config('ADMIN_SECRET');
 
-    // Only assign 'admin' if a non-empty secret exists AND matches
-    $role = ($adminSecret && $request->input('admin_code') === $adminSecret) ? 'admin' : 'user';
+    // Determine role_id: 1 for admin, 2 for user
+    $roleId = ($adminSecret && $request->input('admin_code') === $adminSecret) ? 1 : 2;
 
-//     dd([
-//     'provided_code' => $request->input('admin_code'),
-//     'env_code' => env('ADMIN_SECRET'),
-//     'match' => $request->input('admin_code') === env('ADMIN_SECRET')
-// ]);
+    // Always assign status_id 1 (active)
+    $statusId = 1;
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $role,
-        ]);
+    User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role_id' => $roleId,
+        'status_id' => $statusId,
+    ]);
 
-        return redirect('/login')->with('success', 'Account created. Please log in.');
-    }
+    return redirect('/login')->with('success', 'Account created. Please log in.');
+}
 }

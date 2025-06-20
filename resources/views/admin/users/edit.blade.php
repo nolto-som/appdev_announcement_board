@@ -20,11 +20,12 @@
 
         <div class="mb-3">
             <label>Role</label>
-            <select name="role" class="form-control">
-                <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+            <select name="role_id" class="form-control">
+                <option value="2" {{ $user->role_id == 2 ? 'selected' : '' }}>User</option>
+                <option value="1" {{ $user->role_id == 1 ? 'selected' : '' }}>Admin</option>
             </select>
         </div>
+
 
         <button class="btn btn-primary">Update User</button>
         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancel</a>

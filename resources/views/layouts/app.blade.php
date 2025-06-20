@@ -45,39 +45,21 @@
             </button>
         @endauth
         <a class="navbar-brand fw-bold" href="/">📢 Community Board</a>
+  
 
         <div class="d-flex ms-auto align-items-center gap-2">
+        <div>
+            <a class="nav-link me-3" href="{{ route('about') }}">ℹ️ About</a>
+        </div>
             @auth
                 @php
     $unread = auth()->user()->unreadNotifications;
 @endphp
 
-<div class="dropdown me-3">
-    <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown">
-        🔔 Notifications
-        @if($unread->count() > 0)
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ $unread->count() }}
-            </span>
-        @endif
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end">
-        @forelse($unread as $notification)
-            <li>
-                <button class="dropdown-item notification-item" data-bs-toggle="modal" data-bs-target="#announcementModal" data-id="{{ $notification->data['id'] }}" data-notification-id="{{ $notification->id }}">
-                         📢 View: {{ $notification->data['title'] }}
-                </button>
-            </li>
-        @empty
-            <li><span class="dropdown-item text-muted">No new announcements</span></li>
-        @endforelse
-    </ul>
-</div>
-
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         👤 {{ auth()->user()->name }}
-                        @if(auth()->check() && auth()->user()->role === 'admin')
+                        @if(auth()->check() && auth()->user()->role_id == 1)
                             <span class="badge bg-danger">Admin</span>
                         @endif
                     </a>
@@ -108,7 +90,7 @@
                 <li class="nav-item mb-2"><a class="nav-link" href="/">🏠 Home</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('announcements.recent') }}">🕒 Recent</a></li>
                 
-                @if(auth()->check() && auth()->user()->role === 'admin')
+                 @if(auth()->check() && auth()->user()->role_id == 1)
                     <!-- <li class="nav-item mb-2"><a class="nav-link" href="{{ route('admin.announcements.index') }}">🛠 Manage Announcements</a></li> -->
                     <li class="nav-item mb-2">
                     <a class="nav-link" href="{{ route('admin.users.index') }}">👥 User Management</a>
@@ -137,8 +119,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.notification-item').forEach(item => {
         item.addEventListener('click', function () {
+            const announcementId = this.dataset.id;
             const notificationId = this.dataset.notificationId;
 
+            // Mark as read
             fetch(`/notifications/${notificationId}/mark-read`, {
                 method: 'POST',
                 headers: {
@@ -146,15 +130,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                if (response.ok) {
-                    // Optionally remove badge without full reload
-                    this.closest('.dropdown').querySelector('.badge')?.remove();
-                }
-            });
+            }).then(res => res.ok && this.closest('.dropdown').querySelector('.badge')?.remove());
+
+            // Fetch announcement content
+            fetch(`/announcements/${announcementId}/json`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('announcementModalLabel').textContent = data.title;
+                    document.getElementById('announcementContent').textContent = data.content;
+
+                    const img = document.getElementById('announcementImage');
+                    if (data.image) {
+                        img.src = `/storage/${data.image}`;
+                        img.classList.remove('d-none');
+                    } else {
+                        img.classList.add('d-none');
+                    }
+                });
         });
     });
 });
+
 </script>
 
 

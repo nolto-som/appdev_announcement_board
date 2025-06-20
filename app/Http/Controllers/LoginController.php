@@ -14,26 +14,36 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-  public function login(Request $request) {
+  public function login(Request $request)
+{
     $credentials = [
         'email' => $request->email,
         'password' => $request->password,
-        'status' => 'active',
     ];
 
     if (Auth::attempt($credentials)) {
-        return redirect()->intended('/');
-    }
+        $user = Auth::user();
 
-    // Check if user exists but is suspended
-    $user = User::where('email', $request->email)->first();
-    if ($user && $user->status !== 'active') {
-        return back()->withErrors(['email' => 'Your account is suspended.']);
+        // Check status: if not active, log out and show error
+        if ($user->status_id != 1) { // 1 = active
+            Auth::logout();
+            return back()->withErrors(['email' => 'Your account is suspended.']);
+        }
+
+        // Redirect based on role_id
+        switch ($user->role_id) {
+            case 1:
+                return redirect()->intended('/admin/announcements');
+            case 2:
+                return redirect()->intended('/');
+
+            default:
+                return redirect('/'); // fallback
+        }
     }
 
     return back()->withErrors(['email' => 'Invalid credentials.']);
 }
-
 
     public function logout(Request $request) {
         Auth::logout();
