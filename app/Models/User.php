@@ -58,9 +58,11 @@ class User extends Authenticatable
     return $this->status === 'suspended';
     }
 
-public function role() {
-    return $this->belongsTo(Role::class);
+public function role()
+{
+    return $this->belongsTo(Role::class, 'role_id');
 }
+
 
 public function status() {
     return $this->belongsTo(Status::class);

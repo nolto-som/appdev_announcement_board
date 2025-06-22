@@ -18,17 +18,19 @@ public function home(Request $request)
 
     $search = $request->input('search');
 
-    $announcements = Announcement::where('status', 'approved')
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%")
-                  ->orWhereRaw("DATE_FORMAT(created_at, '%M %d, %Y') LIKE ?", ["%{$search}%"])
-                  ->orWhereRaw("DATE_FORMAT(created_at, '%Y-%m-%d') LIKE ?", ["%{$search}%"]);
-            });
-        })
-        ->latest()
-        ->get();
+    $announcements = Announcement::with('announcementStatus')
+    ->where('announcement_status_id', 1)
+    ->when($search, function ($query, $search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('content', 'like', "%{$search}%")
+              ->orWhereRaw("DATE_FORMAT(created_at, '%M %d, %Y') LIKE ?", ["%{$search}%"])
+              ->orWhereRaw("DATE_FORMAT(created_at, '%Y-%m-%d') LIKE ?", ["%{$search}%"]);
+        });
+    })
+    ->latest()
+    ->get();
+
 
     return view('home', compact('announcements'));
 }
@@ -37,7 +39,8 @@ public function home(Request $request)
 
 public function recent()
 {
-    $recentAnnouncements = Announcement::where('announcement_status_id', 1) // 1 = approved/published
+    $recentAnnouncements = Announcement::with('announcementStatus') // Eager load the status
+        ->where('announcement_status_id', 1) // 1 = approved/published
         ->orderBy('created_at', 'desc')
         ->take(5)
         ->get();
@@ -46,25 +49,31 @@ public function recent()
 }
 
 
+
     
 
      // Show all announcements (admin view)
    public function index(Request $request)
 {
-    $query = Announcement::query();
+    $query = Announcement::with('announcementStatus') // eager load for view
+        ->join('announcement_statuses', 'announcements.announcement_status_id', '=', 'announcement_statuses.id')
+        ->select('announcements.*'); // ensure we only fetch announcement columns
 
     if ($search = $request->input('search')) {
         $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
               ->orWhere('content', 'like', "%{$search}%")
-              ->orWhereDate('created_at', $search); // Search by date (e.g., "2025-06-19")
+              ->orWhereRaw("DATE_FORMAT(announcements.created_at, '%M %d, %Y') LIKE ?", ["%{$search}%"])
+              ->orWhereRaw("DATE_FORMAT(announcements.created_at, '%Y-%m-%d') LIKE ?", ["%{$search}%"])
+              ->orWhere('announcement_statuses.name', 'like', "%{$search}%"); // 🔍 include status name
         });
     }
 
-    $announcements = $query->orderBy('created_at', 'desc')->get();
-    $announcements = Announcement::with('announcementStatus')->get();
+    $announcements = $query->orderBy('announcements.created_at', 'desc')->get();
+
     return view('admin.announcements.index', compact('announcements'));
 }
+
 
 
     // Show form to create a new announcement
@@ -184,12 +193,14 @@ public function recent()
 
 public function archived()
 {
-    $announcements = Announcement::where('announcement_status_id', 2) // 2 = archived
+    $announcements = Announcement::with('announcementStatus') // Eager load the status
+        ->where('announcement_status_id', 2) // 2 = archived
         ->orderBy('created_at', 'desc')
         ->get();
 
     return view('admin.announcements.archived', compact('announcements'));
 }
+
 
 
 // Restore archived announcement

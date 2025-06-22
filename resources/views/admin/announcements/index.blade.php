@@ -58,6 +58,11 @@
         margin-left: 0.5rem;
     }
 
+    .card-footer-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
     .btn {
         border-radius: 0.4rem;
         font-size: 0.875rem;
@@ -134,12 +139,14 @@
 
 </div>
 
+@if($announcements->count())
 @foreach($announcements as $a)
     <!-- Card -->
     <div class="card-modern" data-bs-toggle="modal" data-bs-target="#announcementModal{{ $a->id }}">
         <h5>{{ $a->title }}</h5>
         <p>{{ \Illuminate\Support\Str::limit($a->content, 100) }}</p>
-        <p>Status: <strong>{{ ucfirst($a->announcementStatuses->name ?? 'Unknown') }}</strong></p>
+        <p>Status: <strong>{{ ucfirst($a->announcementStatus->name ?? 'Unknown') }}</strong></p>
+        <div class="card-footer-text">Posted on {{ $a->created_at->format('M d, Y') }}</div>
     </div>
 
     <!-- Modal -->
@@ -155,22 +162,24 @@
                         <img src="{{ asset('storage/' . $a->image) }}" alt="Announcement Image" class="img-fluid rounded mb-3">
                     @endif
 
-                    <p><strong>Status:</strong> {{ ucfirst($a->status) }}</p>
+                    <p><strong>Status:</strong> {{ ucfirst($a->announcementStatus->name ?? 'Unknown') }}</p>
                     <hr>
                     <p>{{ $a->content }}</p>
                 </div>
                 <div class="modal-footer justify-content-start">
-                    @if($a->status === 'pending')
+                    @if($a->announcementStatus->name === 'pending')
                         <form method="POST" action="{{ route('admin.announcements.approve', $a->id) }}">
                             @csrf
                             <button class="btn btn-success btn-sm">Approve</button>
                         </form>
                     @endif
 
+                    @if($a->announcementStatus->name !== 'archived')
                     <form method="POST" action="{{ route('admin.announcements.archive', $a->id) }}">
                         @csrf
                         <button class="btn btn-warning btn-sm">Archive</button>
                     </form>
+                    @endif
 
                     <a href="{{ route('admin.announcements.edit', $a->id) }}" class="btn btn-info btn-sm">Edit</a>
 
@@ -187,4 +196,11 @@
         </div>
     </div>
 @endforeach
+
+@else
+    <div class="alert alert-info mt-3">
+        No announcements found.
+    </div>
+@endif
+
 @endsection

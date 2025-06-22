@@ -46,6 +46,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     //Manage Users
     Route::resource('users', AdminUserController::class)->except(['create', 'store']);
     Route::post('/users/{id}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggleStatus');
+    Route::put('/users/{id}/demote', [UserController::class, 'demote'])->name('users.demote');
 
     
     });

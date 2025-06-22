@@ -16,12 +16,19 @@ class LoginController extends Controller
 
   public function login(Request $request)
 {
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
+
     $credentials = [
         'email' => $request->email,
         'password' => $request->password,
     ];
 
     if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
         $user = Auth::user();
 
         // Check status: if not active, log out and show error

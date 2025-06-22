@@ -13,10 +13,11 @@ class Announcement extends Model
     return $this->belongsTo(User::class);
 }
 
-public function status()
+public function announcementStatus()
 {
-    return $this->belongsTo(AnnouncementStatus::class);
+    return $this->belongsTo(AnnouncementStatus::class, 'announcement_status_id');
 }
+
 
 }
 

@@ -29,7 +29,12 @@ class UserController extends Controller
 
     $users = $query->paginate(10);
 
-    return view('admin.users.index', compact('users'));
+     // Get promoted admins by current admin
+    $promotedAdmins = User::where('role_id', 1)
+        ->where('promoted_by', auth()->id())
+        ->get();
+
+    return view('admin.users.index', compact('users', 'promotedAdmins'));
 }
 
 
@@ -40,7 +45,7 @@ class UserController extends Controller
     return view('admin.users.edit', compact('user', 'roles'));
 }
 
-    public function update(Request $request, $id)
+public function update(Request $request, $id)
 {
     $user = User::findOrFail($id);
 
@@ -50,10 +55,49 @@ class UserController extends Controller
         'role_id' => 'required|exists:roles,id',
     ]);
 
-    $user->update($request->only(['name', 'email', 'role_id']));
+    // Track original role before update
+    $originalRoleId = $user->role_id;
+
+    // Update basic fields
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->role_id = $request->role_id;
+
+    // If role is being changed to admin (1) and wasn't admin before
+    if ($request->role_id == 1 && $originalRoleId != 1) {
+        $user->promoted_by = auth()->id(); // set who promoted the user
+    }
+
+    $user->save();
 
     return redirect()->route('admin.users.index')->with('success', 'User updated.');
 }
+
+public function promotedAdmins()
+{
+    $admins = User::where('role_id', 1)
+                  ->whereNotNull('promoted_by')
+                  ->where('promoted_by', auth()->id())
+                  ->get();
+
+    return view('admin.users.promoted_admins', compact('admins'));
+}
+
+public function demote($id)
+{
+    $user = User::findOrFail($id);
+
+    if ($user->role_id === 1 && $user->promoted_by === auth()->id()) {
+        $user->role_id = 2; // Back to regular user
+        $user->promoted_by = null;
+        $user->save();
+
+        return back()->with('success', 'Admin demoted successfully.');
+    }
+
+    return back()->with('error', 'You are not authorized to demote this admin.');
+}
+
 
 
     public function destroy($id)

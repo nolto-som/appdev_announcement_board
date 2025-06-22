@@ -88,8 +88,10 @@
 </div>
 
 </div>
-
+    
+    
     @isset($announcements)
+        @if($announcements->count())
         <div class="row justify-content-center px-3">
             <div class="col-md-9">
                 @foreach($announcements as $announcement)
@@ -124,6 +126,12 @@
                         </div>
                     </div>
                 @endforeach
+
+                @else
+                <div class="alert alert-info mt-3">
+                    No announcements found.
+                </div>
+                @endif
             </div>
         </div>
     @endisset
