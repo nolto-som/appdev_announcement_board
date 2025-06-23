@@ -34,6 +34,7 @@
 ## 🧑‍💻 User Roles
 
 - **Admin**: Full access to manage users and announcements
+           : Can promote users to admin
 - **User**: Can view anouncement and change profile
 - **Guest**: Can view approved announcements only
 
